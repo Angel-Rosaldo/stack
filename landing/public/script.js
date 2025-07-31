@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.textContent = 'Enviando...';
 
             try {
-                const response = await fetch('/api/contacts', {
+                const response = await fetch('http://167.172.150.250:9040/api/contacts', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
