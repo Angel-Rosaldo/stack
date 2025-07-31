@@ -1,0 +1,61 @@
+services:
+  # PostgreSQL (usando tu contenedor existente)
+  postgres:
+    image: postgres:latest
+    container_name: pg-db-93
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: crm
+    ports:
+      - "9910:5432"
+    volumes:
+      - pg-data-03:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d crm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # API Node.js
+  api:
+    build: ./api
+    ports:
+      - "9040:3000"
+    environment:
+      NODE_ENV: production
+    env_file:
+      - ./api/.env_docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # Frontend CRM (React)
+  crm:
+    build: ./crm
+    ports:
+      - "1090:80"
+    depends_on:
+      - api
+    networks:
+      - app-network
+
+  # Landing Page (HTML estático)
+  landing:
+    build: ./landing
+    ports:
+      - "3273:80"
+    networks:
+      - app-network
+
+volumes:
+  pg-data-03:
+    external: true  # Usa tu volumen existente
+
+networks:
+  app-network:
+    driver: bridge
